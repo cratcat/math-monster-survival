@@ -1,10 +1,10 @@
 (() => {
   const $ = id => document.getElementById(id);
   const monsters = [
-    {name:"모찌", type:"전기 타입 · 성장형", art:"◕ᴥ◕", color:"#8ef1db", unlock:0, desc:"작지만 용감한 전기 슬라임"},
-    {name:"기동병 세라", type:"정예 병단 · 기동형", art:"✦", color:"#a7c4a2", unlock:150, desc:"빠른 기동으로 빈틈을 노려"},
-    {name:"전략가 카일", type:"정예 병단 · 전략형", art:"⌖", color:"#b8c2ca", unlock:350, desc:"분석과 판단으로 작전을 지휘해"},
-    {name:"단장 노아", type:"정예 병단 · 지휘형", art:"✧", color:"#d6b18e", unlock:650, desc:"병단을 이끄는 노련한 지휘관"}
+    {name:"훈련병 재윤", type:"조사병단 · 신병형", art:"⚔", color:"#7fa37a", unlock:0, desc:"아직 서툴지만 누구보다 용감한 신병"},
+    {name:"기동병 미라", type:"조사병단 · 기동형", art:"✦", color:"#a7c4a2", unlock:150, desc:"입체기동장치로 거인의 약점을 노려"},
+    {name:"분대장 레온", type:"조사병단 · 최강형", art:"⌖", color:"#b8c2ca", unlock:350, desc:"냉철한 판단으로 거인을 베는 최강의 병사"},
+    {name:"단장 아르윈", type:"조사병단 · 지휘형", art:"✧", color:"#d6b18e", unlock:650, desc:"인류의 희망을 이끄는 노련한 지휘관"}
   ];
   const tips = [
     "분수는 분모를 같게 만든 뒤 분자끼리 계산하면 쉬워져!",
@@ -66,7 +66,7 @@
     const next=monsters[Math.min(idx+1,monsters.length-1)];
     const progress=idx===monsters.length-1?100:Math.min(100,Math.max(0,(state.xp-m.unlock)/(next.unlock-m.unlock)*100));
     $("evolutionBar").style.width=`${progress}%`;
-    $("evolutionText").textContent=idx===monsters.length-1?"모든 몬스터를 해금했어!":`다음 진화까지 ${Math.max(0,next.unlock-state.xp)} XP`;
+    $("evolutionText").textContent=idx===monsters.length-1?"모든 병사를 해금했어!":`다음 진화까지 ${Math.max(0,next.unlock-state.xp)} XP`;
     $("monsterCount").textContent=`${state.unlocked.filter(Boolean).length}/4`;
     $("monsterList").innerHTML=monsters.map((mon,i)=>`<div class="monster-chip ${state.unlocked[i]||state.xp>=mon.unlock?"unlocked":""}"><span class="chip-art" style="color:${mon.color}">${state.xp>=mon.unlock?mon.art:"?"}</span><small>${state.xp>=mon.unlock?mon.name:"미발견"}</small></div>`).join("");
     $("missionProgress").textContent=`${Math.min(5,state.questions)} / 5 완료`;
@@ -82,15 +82,15 @@
     if(state.sessionActive)return;
     state.sessionActive=true;state.playerHp=100;state.enemyHp=100;state.round=1;
     $("startBtn").textContent="⏸ 도전 중";$("startBtn").disabled=true;$("answerInput").disabled=false;$("answerBtn").disabled=false;$("hintBtn").disabled=false;$("skipBtn").disabled=false;
-    $("arenaMessage").textContent="거인이 나타났다! 정답을 맞혀 토벌하자.";
+    $("arenaMessage").textContent="성벽 밖에 거인이 나타났다! 정답으로 입체기동 공격을 날려라!";
     timerInterval=setInterval(()=>{if(state.sessionActive){state.seconds++;$("timer").textContent=fmtTime(state.seconds);}},1000);
     newQuestion();
   }
   function endSession(won){
     state.sessionActive=false;clearInterval(timerInterval);state.bestTime=Math.max(state.bestTime,state.seconds);
     $("startBtn").disabled=false;$("startBtn").textContent="↻ 다시 도전";$("answerInput").disabled=true;$("answerBtn").disabled=true;$("hintBtn").disabled=true;$("skipBtn").disabled=true;
-    $("arenaMessage").textContent=won?"완벽한 생존! 다음 라운드에 도전해 봐.":"체력이 모두 소진됐어. 잠깐 쉬고 다시 도전!";
-    $("modalTitle").textContent=won?"라운드 클리어!":"생존 종료";
+    $("arenaMessage").textContent=won?"성벽을 지켜냈어! 다음 작전에 도전해 봐.":"체력이 모두 소진됐어. 후퇴 후 다시 도전!";
+    $("modalTitle").textContent=won?"작전 성공!":"작전 실패";
     $("modalText").textContent=won?`정답 ${state.correct}개! ${state.seconds}초 동안 버텼어. 계속 성장해 보자.`:`이번 도전에서 ${state.correct}개의 정답을 맞혔어. 힌트를 활용하면 더 오래 생존할 수 있어!`;
     $("modalAction").textContent="계속하기";
     $("modalBackdrop").classList.add("show");
@@ -103,11 +103,11 @@
     if(answerCorrect(input,state.question.answer)){
       state.correct++;state.streak++;state.bestStreak=Math.max(state.bestStreak,state.streak);
       const gain=state.hinted?8:15;state.xp+=gain;state.totalXp+=gain;state.shards+=1;
-      state.enemyHp-=34;$("feedback").textContent=`정답! +${gain} XP · 거인에게 강력한 공격을 했어!`;$("feedback").className="question-hint good";
-      $("arenaMessage").textContent=`정답 공격 성공! ${gain} XP 획득`;
+      state.enemyHp-=34;$("feedback").textContent=`정답! +${gain} XP · 거인의 목덜미를 정확히 베었어!`;$("feedback").className="question-hint good";
+      $("arenaMessage").textContent=`급소 명중! ${gain} XP 획득`;
       $("friendBody").classList.remove("attack");void $("friendBody").offsetWidth;$("friendBody").classList.add("attack");
       $("enemyHealth").style.width=`${Math.max(0,state.enemyHp)}%`;
-      if(state.enemyHp<=0){state.round++;state.enemyHp=100;$("enemyHealth").style.width="100%";$("enemyName").textContent=["기행종 거인","갑주형 거인","대형 거인","야수형 거인"][(state.round-1)%4];toast("거인 토벌 성공! 다음 작전으로!");}
+      if(state.enemyHp<=0){state.round++;state.enemyHp=100;$("enemyHealth").style.width="100%";$("enemyName").textContent=["기행종 거인","갑주 거인","초대형 거인","수형 거인"][(state.round-1)%4];toast("거인 토벌 성공! 심장을 바쳐라!");}
       if(state.streak>=3&&!state.comboClaimed){state.shards++;state.comboClaimed=true;toast("3콤보 보상! 몬스터 조각 +1");}
       if(state.questions>=5&&!state.missionClaimed){state.xp+=20;state.totalXp+=20;state.missionClaimed=true;toast("미션 완료! 보너스 +20 XP");}
       const oldUnlock=state.unlocked.slice();state.unlocked=monsters.map(m=>state.xp>=m.unlock);
@@ -135,5 +135,12 @@
   $("answerForm").addEventListener("submit",submit);$("startBtn").addEventListener("click",start);$("bottomStart").addEventListener("click",()=>{if(!state.sessionActive)start();$("arena").scrollIntoView({behavior:"smooth",block:"center"});});$("hintBtn").addEventListener("click",hint);$("skipBtn").addEventListener("click",skip);$("evolveBtn").addEventListener("click",evolve);$("resetBtn").addEventListener("click",reset);
   $("soundBtn").addEventListener("click",()=>{soundOn=!soundOn;$("soundBtn").textContent=soundOn?"♫":"♪";toast(soundOn?"효과음 표시를 켰어. (현재 버전은 효과음 미지원)":"효과음 표시를 껐어.");});
   $("closeModal").addEventListener("click",()=>$("modalBackdrop").classList.remove("show"));$("modalAction").addEventListener("click",()=>{$("modalBackdrop").classList.remove("show");if(!state.sessionActive)start();});
+
+  // 페이지 맨 위 제목 배너
+  const banner=document.createElement("h1");
+  banner.textContent="재윤이를 위한 진격의 거인 수학 게임";
+  banner.style.cssText="margin:0;padding:18px 12px;text-align:center;font-size:clamp(20px,4.5vw,32px);font-weight:900;letter-spacing:1px;color:#f3e9d2;background:linear-gradient(180deg,#2b3a2e,#1a241c);border-bottom:3px solid #b08d57;text-shadow:0 2px 6px rgba(0,0,0,.6);";
+  document.body.prepend(banner);
+
   load();render();
 })();
