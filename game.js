@@ -40,11 +40,61 @@
   function normalize(s){return String(s).trim().replace(/\s/g,"").replace(/,/g,"").replace(/％/g,"%").replace(/%$/,"");}
   function answerCorrect(input,answer){let a=normalize(input),b=normalize(answer);if(a===b)return true;const numericA=Number(a),numericB=Number(b);return a!==""&&Number.isFinite(numericA)&&Number.isFinite(numericB)&&Math.abs(numericA-numericB)<0.011;}
   function currentMonster(){return Math.min(state.evolutionIndex||0, monsters.length-1);}
-  function paint(el,m){if(!el)return;el.textContent="";el.style.backgroundImage=`url(${m.img})`;el.style.backgroundSize="cover";el.style.backgroundPosition="center top";el.style.backgroundRepeat="no-repeat";el.style.borderRadius="12px";}
+
+  // ===== 동적 캐릭터 연출 (애니메이션) =====
+  (function(){
+    const css=`
+.jy-idle{animation:jyBob 2.4s ease-in-out infinite;transform-origin:50% 90%}
+.jy-breath{animation:jyBreath 3.2s ease-in-out infinite;transform-origin:50% 100%}
+.jy-attack{animation:jyLunge .6s ease-out}
+.jy-hit{animation:jyHit .5s ease-out}
+.jy-hurt{animation:jyHurt .5s ease-out}
+.jy-appear{animation:jyAppear .7s cubic-bezier(.2,1.4,.4,1)}
+.jy-evolve{animation:jyEvolve 1s ease-out}
+.jy-float{position:fixed;z-index:9999;pointer-events:none;font-weight:900;font-size:30px;color:#ffd24a;text-shadow:0 2px 0 #7a1f12,0 0 8px #000;animation:jyFloat .9s ease-out forwards}
+.jy-float.bad{color:#ff6b6b}
+.jy-slash{position:fixed;z-index:9998;pointer-events:none;height:5px;width:0;background:linear-gradient(90deg,transparent,#fff,#cfe8ff);box-shadow:0 0 12px #9cf;border-radius:3px;transform-origin:left center;animation:jySlash .4s ease-out forwards}
+.jy-bubble{position:fixed;z-index:9999;pointer-events:none;max-width:200px;padding:8px 12px;background:#f3e9d2;color:#2b2218;border:2px solid #b08d57;border-radius:12px;font-size:13px;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,.4);animation:jyPop 2s ease-out forwards}
+@keyframes jyBob{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-6px) scale(1.03)}}
+@keyframes jyBreath{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
+@keyframes jyLunge{0%{transform:translateX(0)}30%{transform:translateX(-14px) rotate(-5deg)}60%{transform:translateX(46px) rotate(7deg) scale(1.15)}100%{transform:translateX(0)}}
+@keyframes jyHit{0%{transform:translateX(0);filter:brightness(1)}15%{transform:translateX(-12px) rotate(-2deg);filter:brightness(2.2) saturate(1.8)}35%{transform:translateX(12px) rotate(2deg)}55%{transform:translateX(-7px)}100%{transform:translateX(0);filter:brightness(1)}}
+@keyframes jyHurt{0%{transform:translateX(0);filter:none}20%{transform:translateX(-10px);filter:brightness(.7) sepia(1) hue-rotate(-50deg) saturate(4)}40%{transform:translateX(10px)}60%{transform:translateX(-6px)}100%{transform:translateX(0);filter:none}}
+@keyframes jyAppear{0%{opacity:0;transform:scale(.4) translateY(30px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes jyEvolve{0%{filter:brightness(1);transform:scale(1)}30%{filter:brightness(4);transform:scale(1.25)}100%{filter:brightness(1);transform:scale(1)}}
+@keyframes jyFloat{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}20%{opacity:1;transform:translate(-50%,-80%) scale(1.3)}100%{opacity:0;transform:translate(-50%,-220%) scale(1)}}
+@keyframes jySlash{0%{width:0;opacity:1}60%{width:var(--w);opacity:1}100%{width:var(--w);opacity:0}}
+@keyframes jyPop{0%{opacity:0;transform:translate(-50%,-90%) scale(.7)}12%{opacity:1;transform:translate(-50%,-100%) scale(1)}85%{opacity:1;transform:translate(-50%,-100%)}100%{opacity:0;transform:translate(-50%,-100%)}}
+@media (prefers-reduced-motion:reduce){.jy-idle,.jy-breath{animation:none}}`;
+    const st=document.createElement("style");st.textContent=css;document.head.appendChild(st);
+  })();
+  function play(el,cls,ms){if(!el)return;el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls);setTimeout(()=>el.classList.remove(cls),ms||700);}
+  function spawn(cls,text,x,y,ms,extra){const d=document.createElement("div");d.className=cls;if(text)d.textContent=text;d.style.left=x+"px";d.style.top=y+"px";if(extra)for(const k in extra)d.style.setProperty(k,extra[k]);document.body.appendChild(d);setTimeout(()=>d.remove(),ms);return d;}
+  function say(text){const f=$("friendBody");if(!f)return;const r=f.getBoundingClientRect();if(!r.width)return;document.querySelectorAll(".jy-bubble").forEach(b=>b.remove());spawn("jy-bubble",text,r.left+r.width/2,r.top-6,2000);}
+  function fxHit(dmg){
+    const e=$("enemyArt"),f=$("friendBody");
+    play(f,"jy-attack",650);
+    setTimeout(()=>{
+      if(!e)return;const r=e.getBoundingClientRect();if(!r.width)return;
+      play(e,"jy-hit",550);
+      for(let i=0;i<2;i++)spawn("jy-slash","",r.left+r.width*(.15+i*.1),r.top+r.height*(.2+i*.15),450,{"--w":(r.width*.75)+"px","transform":`rotate(${28+i*10}deg)`});
+      spawn("jy-float",`-${dmg}`,r.left+r.width/2,r.top+r.height*.4,900);
+    },220);
+    const lines=["입체기동 발동!","급소 명중!","이 정도쯤이야!","심장을 바쳐라!","거인의 약점은 목덜미!"];
+    say(lines[rand(0,lines.length-1)]);
+  }
+  function fxHurt(dmg){
+    const f=$("friendBody");play(f,"jy-hurt",550);
+    if(f){const r=f.getBoundingClientRect();if(r.width)spawn("jy-float bad",`-${dmg}`,r.left+r.width/2,r.top+r.height*.3,900);}
+    const lines=["큭... 아직이야!","다시 한 번!","포기하지 않아!","힌트를 확인하자!"];
+    say(lines[rand(0,lines.length-1)]);
+  }
+  function paint(el,m){if(!el)return;el.classList.add("jy-idle");el.textContent="";el.style.backgroundImage=`url(${m.img})`;el.style.backgroundSize="cover";el.style.backgroundPosition="center top";el.style.backgroundRepeat="no-repeat";el.style.borderRadius="12px";}
   function paintEnemy(){
     let img=$("enemyArt");
-    if(!img){const name=$("enemyName");if(!name)return;img=document.createElement("img");img.id="enemyArt";img.alt="거인";img.style.cssText="display:block;margin:0 auto 8px;width:min(220px,60%);aspect-ratio:1/1;object-fit:cover;object-position:center top;border-radius:14px;border:2px solid #b08d57;box-shadow:0 4px 16px rgba(0,0,0,.5);";name.parentNode.insertBefore(img,name);}
-    img.src=enemyImgs[(state.round-1)%enemyImgs.length];
+    if(!img){const name=$("enemyName");if(!name)return;img=document.createElement("img");img.id="enemyArt";img.alt="거인";img.className="jy-breath";img.style.cssText="display:block;margin:0 auto 8px;width:min(220px,60%);aspect-ratio:1/1;object-fit:cover;object-position:center top;border-radius:14px;border:2px solid #b08d57;box-shadow:0 4px 16px rgba(0,0,0,.5);";name.parentNode.insertBefore(img,name);}
+    const src=enemyImgs[(state.round-1)%enemyImgs.length];
+    if(img.getAttribute("src")!==src){img.src=src;play(img,"jy-appear",750);}
   }
   function render(){
     state.level=levelFor(state.xp);
@@ -88,7 +138,7 @@
     if(state.sessionActive)return;
     state.sessionActive=true;state.playerHp=100;state.enemyHp=100;state.round=1;
     $("startBtn").textContent="⏸ 도전 중";$("startBtn").disabled=true;$("answerInput").disabled=false;$("answerBtn").disabled=false;$("hintBtn").disabled=false;$("skipBtn").disabled=false;
-    $("arenaMessage").textContent="성벽 밖에 거인이 나타났다! 정답으로 입체기동 공격을 날려라!";
+    $("arenaMessage").textContent="성벽 밖에 거인이 나타났다! 정답으로 입체기동 공격을 날려라!";setTimeout(()=>say("문제를 맞히면 내가 거인을 공격할게!"),400);
     timerInterval=setInterval(()=>{if(state.sessionActive){state.seconds++;$("timer").textContent=fmtTime(state.seconds);}},1000);
     newQuestion();
   }
@@ -111,7 +161,7 @@
       const gain=state.hinted?8:15;state.xp+=gain;state.totalXp+=gain;state.shards+=1;
       state.enemyHp-=34;$("feedback").textContent=`정답! +${gain} XP · 거인의 목덜미를 정확히 베었어!`;$("feedback").className="question-hint good";
       $("arenaMessage").textContent=`급소 명중! ${gain} XP 획득`;
-      $("friendBody").classList.remove("attack");void $("friendBody").offsetWidth;$("friendBody").classList.add("attack");
+      $("friendBody").classList.remove("attack");void $("friendBody").offsetWidth;$("friendBody").classList.add("attack");fxHit(34);
       $("enemyHealth").style.width=`${Math.max(0,state.enemyHp)}%`;
       if(state.enemyHp<=0){state.round++;state.enemyHp=100;$("enemyHealth").style.width="100%";$("enemyName").textContent=["기행종 거인","갑주 거인","초대형 거인","수형 거인"][(state.round-1)%4];toast("거인 토벌 성공! 심장을 바쳐라!");}
       if(state.streak>=3&&!state.comboClaimed){state.shards++;state.comboClaimed=true;toast("3콤보 보상! 몬스터 조각 +1");}
@@ -122,7 +172,7 @@
       if(state.playerHp>=100)state.playerHp=100;
     }else{
       state.streak=0;state.playerHp-=20;$("playerHealth").style.width=`${Math.max(0,state.playerHp)}%`;
-      $("feedback").textContent=`아쉽지만 오답이야. 힌트: ${state.question.hint}`;$("feedback").className="question-hint bad";
+      fxHurt(20);$("feedback").textContent=`아쉽지만 오답이야. 힌트: ${state.question.hint}`;$("feedback").className="question-hint bad";
       $("arenaMessage").textContent="거인의 반격! 힌트를 확인하고 다시 도전해.";
       $("enemyHealth").style.width=`${Math.max(0,state.enemyHp)}%`;
       $("questionText").textContent=state.question.q;
@@ -136,7 +186,7 @@
   }
   function hint(){if(!state.question)return;state.hinted=true;$("feedback").textContent=`힌트: ${state.question.hint} (힌트를 사용하면 정답 보상은 8 XP야.)`;$("feedback").className="question-hint";$("tipText").textContent=state.question.hint;}
   function skip(){if(!state.sessionActive)return;state.playerHp-=10;$("playerHealth").style.width=`${Math.max(0,state.playerHp)}%`;state.streak=0;if(state.playerHp<=0){endSession(false);return;}newQuestion();$("feedback").textContent="문제를 바꿨어. 체력 10을 사용했으니 신중하게 도전해!";$("feedback").className="question-hint bad";}
-  function evolve(){const idx=currentMonster(),next=monsters[idx+1];if(!next||state.xp<next.unlock)return;state.evolutionIndex=idx+1;state.shards=Math.max(0,state.shards-3);state.evolved=true;toast(`${next.name} 진화 완료!`);render();}
+  function evolve(){const idx=currentMonster(),next=monsters[idx+1];if(!next||state.xp<next.unlock)return;state.evolutionIndex=idx+1;state.shards=Math.max(0,state.shards-3);state.evolved=true;toast(`${next.name} 진화 완료!`);render();play($("friendBody"),"jy-evolve",1000);play($("heroMonster"),"jy-evolve",1000);}
   function reset(){if(!confirm("모든 레벨과 기록을 초기화할까요?"))return;clearInterval(timerInterval);localStorage.removeItem("mathQuestSave");state={xp:0,totalXp:0,level:1,correct:0,attempts:0,streak:0,bestStreak:0,bestTime:0,shards:0,questions:0,sessionActive:false,seconds:0,round:1,enemyHp:100,playerHp:100,question:null,hinted:false,missionClaimed:false,comboClaimed:false,unlocked:[true,false,false,false],evolved:false,evolutionIndex:0};$("startBtn").textContent="⚔ 생존 시작";$("startBtn").disabled=false;$("answerInput").disabled=true;$("answerBtn").disabled=true;$("hintBtn").disabled=true;$("skipBtn").disabled=true;$("enemyHealth").style.width="100%";$("playerHealth").style.width="100%";$("questionText").textContent="도전을 시작하면 첫 문제가 나타나요.";render();toast("진행 상황을 초기화했어.");}
   $("answerForm").addEventListener("submit",submit);$("startBtn").addEventListener("click",start);$("bottomStart").addEventListener("click",()=>{if(!state.sessionActive)start();$("arena").scrollIntoView({behavior:"smooth",block:"center"});});$("hintBtn").addEventListener("click",hint);$("skipBtn").addEventListener("click",skip);$("evolveBtn").addEventListener("click",evolve);$("resetBtn").addEventListener("click",reset);
   $("soundBtn").addEventListener("click",()=>{soundOn=!soundOn;$("soundBtn").textContent=soundOn?"♫":"♪";toast(soundOn?"효과음 표시를 켰어. (현재 버전은 효과음 미지원)":"효과음 표시를 껐어.");});

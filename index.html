@@ -1,109 +1,116 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#10182d">
-  <title>재윤이를 위한 진격의 거인 수학 게임</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>재윤이를 위한 진격의 거인 수학 게임</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app-shell">
-    <div class="personal-title">재윤이를 위한 진격의 거인 수학 게임</div>
-    <header class="topbar">
-      <div class="brand"><span class="brand-mark">✦</span><div><strong>거인전 수학 서바이벌</strong><small>WALLBREAKERS · MATH SURVIVAL</small></div></div>
-      <div class="top-actions"><span class="pill" id="stagePill">STAGE 01</span><button class="icon-button" id="soundBtn" aria-label="효과음 설정">♫</button></div>
-    </header>
+<main class="wrap">
 
-    <main>
-      <section class="hero">
-        <div class="hero-copy">
-          <div class="eyebrow"><span class="live-dot"></span> SCOUT SURVIVAL OPERATION</div>
-          <h1>수학으로 살아남아,<br><em>거대한 적을 쓰러뜨려라!</em></h1>
-          <p>문제를 풀 때마다 정예 병사가 성장하고, 거인과의 전투에서 살아남아!</p>
-          <div class="hero-stats">
-            <div><small>TRAINER LEVEL</small><strong id="level">Lv. 1</strong></div>
-            <div><small>EXPERIENCE</small><strong id="xp">0 / 100 XP</strong></div>
-            <div><small>BEST STREAK</small><strong id="bestStreak">0 COMBO</strong></div>
-          </div>
-          <div class="xp-track"><div id="xpBar"></div></div>
-        </div>
-        <div class="hero-art" aria-label="정찰병과 거인의 전투 일러스트">
-          <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
-          <div class="spark s1">✦</div><div class="spark s2">✧</div><div class="spark s3">✦</div>
-          <div class="monster-display" id="heroMonster">
-            <div class="monster-shadow"></div><div class="monster-face">◕ᴥ◕</div><div class="monster-horns">⌁　⌁</div><div class="monster-belly"></div>
-          </div>
-          <div class="level-tag" id="evolutionTag">SCOUT UNIT · RANK 1</div>
-        </div>
-      </section>
+  <section class="card hero">
+    <div id="heroMonster" class="hero-monster"><div class="monster-face"></div></div>
+    <div class="hero-info">
+      <div id="evolutionTag" class="tag">EVOLUTION 1</div>
+      <div class="lv-row"><strong id="level">Lv. 1</strong><span id="xp">0 / 100 XP</span></div>
+      <div class="bar"><i id="xpBar"></i></div>
+      <div class="pill-row">
+        <span id="stagePill" class="pill">STAGE 01</span>
+        <button id="soundBtn" class="icon-btn" title="효과음">♫</button>
+        <button id="resetBtn" class="ghost-btn">초기화</button>
+      </div>
+    </div>
+  </section>
 
-      <section class="scout-roster" aria-label="정예 병사 선택">
-        <div class="section-heading"><div><span class="eyebrow">ELITE SCOUT UNIT</span><h2>정예 병사 소개</h2></div><span class="roster-note">훈련 · 기동 · 토벌</span></div>
-        <div class="scout-grid">
-          <article class="scout-card selected"><div class="scout-portrait portrait-leon"><span class="portrait-hair"></span><span class="portrait-face"></span><span class="portrait-scar"></span></div><div class="scout-info"><strong>레온 하르트</strong><small>돌격형 · 결단력</small><span class="scout-rank">★ ★ ★ ★ ☆</span></div></article>
-          <article class="scout-card"><div class="scout-portrait portrait-sera"><span class="portrait-hair"></span><span class="portrait-face"></span><span class="portrait-scar"></span></div><div class="scout-info"><strong>세라 윈터</strong><small>기동형 · 정밀 타격</small><span class="scout-rank">★ ★ ★ ★ ★</span></div></article>
-          <article class="scout-card"><div class="scout-portrait portrait-kyle"><span class="portrait-hair"></span><span class="portrait-face"></span><span class="portrait-scar"></span></div><div class="scout-info"><strong>카일 로웬</strong><small>전략형 · 분석 능력</small><span class="scout-rank">★ ★ ★ ☆ ☆</span></div></article>
-          <article class="scout-card"><div class="scout-portrait portrait-noa"><span class="portrait-hair"></span><span class="portrait-face"></span><span class="portrait-scar"></span></div><div class="scout-info"><strong>노아 베른</strong><small>수호형 · 방어 전술</small><span class="scout-rank">★ ★ ★ ★ ☆</span></div></article>
-        </div>
-      </section>
+  <section class="stats">
+    <div class="stat"><small>최고 콤보</small><b id="bestStreak">0 COMBO</b></div>
+    <div class="stat"><small>누적 경험치</small><b id="totalXp">0 XP</b></div>
+    <div class="stat"><small>정확도</small><b id="accuracy">—</b><em id="answered">아직 도전 전</em></div>
+    <div class="stat"><small>최장 생존</small><b id="bestTime">0초</b></div>
+    <div class="stat"><small>몬스터 조각</small><b id="shards">0개</b></div>
+  </section>
 
-      <section class="dashboard">
-        <div class="section-heading"><div><span class="eyebrow">YOUR JOURNEY</span><h2>모험 현황</h2></div><button class="text-button" id="resetBtn">초기화 ↻</button></div>
-        <div class="stats-grid">
-          <article class="stat-card"><div class="stat-icon purple">⚡</div><div><small>누적 경험치</small><strong id="totalXp">0 XP</strong></div><span class="stat-foot">성장 에너지</span></article>
-          <article class="stat-card"><div class="stat-icon blue">◎</div><div><small>정답률</small><strong id="accuracy">—</strong></div><span class="stat-foot" id="answered">아직 도전 전</span></article>
-          <article class="stat-card"><div class="stat-icon orange">♨</div><div><small>최고 생존 기록</small><strong id="bestTime">0초</strong></div><span class="stat-foot">새 기록에 도전!</span></article>
-          <article class="stat-card"><div class="stat-icon green">◆</div><div><small>병단 휘장</small><strong id="shards">0개</strong></div><span class="stat-foot">장비 강화에 사용</span></article>
-        </div>
-      </section>
+  <section id="arena" class="card arena">
+    <div class="arena-top">
+      <span id="roundLabel" class="pill">ROUND 01</span>
+      <span id="timer" class="timer">00:00</span>
+      <span id="questionCount" class="pill">문제 1</span>
+    </div>
 
-      <section class="game-layout">
-        <div class="game-panel">
-          <div class="section-heading"><div><span class="eyebrow">ARENA 01</span><h2>거인 토벌 작전</h2></div><span class="difficulty" id="difficulty">초급 · 4~6학년</span></div>
-          <div class="arena" id="arena">
-            <div class="arena-top"><span class="round-label" id="roundLabel">ROUND 01</span><span class="timer">◷ <b id="timer">00:00</b></span></div>
-            <div class="battle-scene">
-              <div class="battle-monster enemy"><div class="enemy-eyes">● ●</div><div class="enemy-mouth">⌣</div><span id="enemyName">기행종 거인</span><div class="health"><i id="enemyHealth"></i></div></div>
-              <div class="vs">VS</div>
-              <div class="battle-monster friend"><div class="friend-body" id="friendBody">◕ᴥ◕</div><span id="friendName">모찌</span><div class="health"><i id="playerHealth"></i></div></div>
-            </div>
-            <div class="arena-message" id="arenaMessage">준비됐어? 문제를 풀고 첫 번째 공격을 시작하자!</div>
-          </div>
-          <div class="question-card">
-            <div class="question-meta"><span id="topic">분수의 덧셈</span><span id="questionCount">문제 1</span></div>
-            <div class="question-text" id="questionText">도전을 시작하면 첫 문제가 나타나요.</div>
-            <form id="answerForm" class="answer-form">
-              <input id="answerInput" type="text" inputmode="decimal" autocomplete="off" placeholder="정답 입력" aria-label="정답 입력" disabled>
-              <button class="primary-button" id="answerBtn" type="submit" disabled>공격하기 <span>↗</span></button>
-            </form>
-            <div class="question-hint" id="feedback">정답을 맞히면 공격 성공! 오답이어도 힌트를 보고 다시 도전할 수 있어.</div>
-            <div class="game-controls"><button class="primary-button start-button" id="startBtn">⚔ 생존 시작</button><button class="secondary-button" id="hintBtn" disabled>힌트 보기</button><button class="secondary-button" id="skipBtn" disabled>문제 바꾸기</button></div>
-          </div>
-        </div>
+    <div class="battle">
+      <div class="side enemy-side">
+        <div id="enemyName" class="name">기행종 거인</div>
+        <div class="hp"><i id="enemyHealth"></i></div>
+      </div>
+      <div class="side friend-side">
+        <div id="friendBody" class="friend-body"></div>
+        <div id="friendName" class="name">훈련병 재윤</div>
+        <div class="hp player"><i id="playerHealth"></i></div>
+      </div>
+    </div>
 
-        <aside class="side-column">
-          <div class="side-card collection-card">
-            <div class="section-heading compact"><div><span class="eyebrow">MONSTER LAB</span><h3>정예 병단</h3></div><span class="count-badge" id="monsterCount">1/4</span></div>
-            <div class="collection-monster" id="collectionMonster"><div class="big-monster">◕ᴥ◕</div><div><strong id="collectionName">모찌</strong><small id="collectionType">전기 타입 · 성장형</small><div class="evolution-progress"><i id="evolutionBar"></i></div><small id="evolutionText">진화까지 100 XP</small></div></div>
-            <div class="monster-list" id="monsterList"></div>
-            <button class="secondary-button full-button" id="evolveBtn" disabled>◆ 몬스터 진화하기</button>
-          </div>
-          <div class="side-card mission-card">
-            <div class="section-heading compact"><div><span class="eyebrow">DAILY QUEST</span><h3>오늘의 미션</h3></div><span class="mission-symbol">✧</span></div>
-            <div class="mission-row"><div class="mission-icon">✓</div><div class="mission-info"><strong>문제 5개 도전</strong><small id="missionProgress">0 / 5 완료</small><div class="mini-track"><i id="missionBar"></i></div></div><span id="missionReward">+20 XP</span></div>
-            <div class="mission-row"><div class="mission-icon gold">⚡</div><div class="mission-info"><strong>3콤보 달성</strong><small id="comboProgress">최고 0콤보</small><div class="mini-track"><i id="comboBar"></i></div></div><span>조각 +1</span></div>
-          </div>
-          <div class="tip-card"><div class="tip-icon">✦</div><div><strong>병단 전술</strong><p id="tipText">분수는 분모를 같게 만든 뒤 분자끼리 계산하면 쉬워져!</p></div></div>
-        </aside>
-      </section>
+    <p id="arenaMessage" class="arena-msg">시작 버튼을 눌러 성벽을 지켜라!</p>
 
-      <section class="bottom-banner"><div class="banner-symbol">✦</div><div><strong>정답 하나가 전황을 바꾼다.</strong><p>수학 실력을 키워 더 강한 거인 토벌 작전에 도전해.</p></div><button id="bottomStart" class="banner-button">도전 계속하기 →</button></section>
-    </main>
-    <footer><span>© 2026 MATH QUEST</span><span>오리지널 병사·거인 디자인 · 학습용 게임</span><span>진행 상황은 이 브라우저에 저장돼요</span></footer>
+    <div class="question-box">
+      <div id="topic" class="topic">수학 도전</div>
+      <div id="questionText" class="question">도전을 시작하면 첫 문제가 나타나요.</div>
+      <form id="answerForm" class="answer-form" autocomplete="off">
+        <input id="answerInput" type="text" inputmode="text" placeholder="정답 입력 (예: 3/4, 12.5)" disabled>
+        <button id="answerBtn" type="submit" class="primary" disabled>공격!</button>
+      </form>
+      <p id="feedback" class="question-hint">정답을 입력하고 공격해 봐!</p>
+      <div class="actions">
+        <button id="hintBtn" class="ghost-btn" disabled>💡 힌트</button>
+        <button id="skipBtn" class="ghost-btn" disabled>⏭ 문제 바꾸기 (-10 HP)</button>
+        <button id="startBtn" class="primary">⚔ 생존 시작</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid2">
+    <div class="card">
+      <h3>병사 도감 <span id="monsterCount" class="pill">1/4</span></h3>
+      <div id="collectionMonster" class="collection-hero"><div class="big-monster"></div></div>
+      <div id="collectionName" class="name center">훈련병 재윤</div>
+      <div id="collectionType" class="sub center">조사병단 · 신병형</div>
+      <div class="bar"><i id="evolutionBar"></i></div>
+      <p id="evolutionText" class="sub center">다음 진화까지 150 XP</p>
+      <button id="evolveBtn" class="primary full" disabled>✨ 진화하기</button>
+      <div id="monsterList" class="monster-list"></div>
+    </div>
+
+    <div class="card">
+      <h3>오늘의 미션</h3>
+      <div class="mission">
+        <div class="row"><span>문제 5개 풀기</span><b id="missionProgress">0 / 5 완료</b></div>
+        <div class="bar"><i id="missionBar"></i></div>
+      </div>
+      <div class="mission">
+        <div class="row"><span>3콤보 달성</span><b id="comboProgress">최고 0콤보</b></div>
+        <div class="bar"><i id="comboBar"></i></div>
+      </div>
+      <h3>작전 팁</h3>
+      <p id="tipText" class="tip">분수는 분모를 같게 만든 뒤 분자끼리 계산하면 쉬워져!</p>
+    </div>
+  </section>
+
+  <div class="bottom-bar">
+    <button id="bottomStart" class="primary full">⚔ 지금 바로 도전하기</button>
   </div>
-  <div class="toast" id="toast" role="status"></div>
-  <div class="modal-backdrop" id="modalBackdrop"><div class="modal"><button class="modal-close" id="closeModal">×</button><div class="modal-icon">✦</div><h2 id="modalTitle">생존 시작!</h2><p id="modalText">정답을 맞히면 경험치를 얻고 몬스터가 강해져.</p><button class="primary-button" id="modalAction">도전 시작하기</button></div></div>
-  <script src="game.js"></script>
+</main>
+
+<div id="modalBackdrop" class="modal-backdrop">
+  <div class="modal">
+    <button id="closeModal" class="close" aria-label="닫기">✕</button>
+    <h2 id="modalTitle">작전 결과</h2>
+    <p id="modalText"></p>
+    <button id="modalAction" class="primary full">계속하기</button>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="game.js"></script>
 </body>
 </html>

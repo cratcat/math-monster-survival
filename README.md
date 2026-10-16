@@ -1,11 +1,17 @@
 # 재윤이를 위한 진격의 거인 수학 게임
 
-GitHub Pages용 정적 웹게임입니다. `index.html`, `style.css`, `game.js`와 `assets/scout-titan-art.png`를 같은 저장소 경로에 업로드하세요.
+초등 수학 문제를 풀며 거인을 토벌하는 브라우저 게임입니다.
+
+## 파일 구성
+- `index.html` : 화면 구조
+- `style.css` : 디자인
+- `game.js` : 게임 로직, 캐릭터 연출(애니메이션)
+- `img/` : 캐릭터·거인 이미지
+
+## 실행
+`index.html`을 브라우저로 열면 바로 실행됩니다.
 
 ## GitHub Pages 배포
-1. ZIP 압축을 풉니다.
-2. 저장소의 기존 게임 파일과 `assets` 폴더를 배포 폴더에 업로드합니다.
-3. 변경 사항을 Commit합니다.
-4. 기존 Pages 주소에서 `Ctrl+F5`로 새로고침합니다.
-
-이미지는 오리지널 애니메이션풍 병사·거인 전투 일러스트이며, 게임 화면에서 로컬 파일로 불러옵니다.
+1. 이 파일들을 리포지토리 최상위에 올립니다.
+2. Settings → Pages → Branch를 `main` / `(root)`로 지정하고 Save.
+3. 1~2분 뒤 `https://내아이디.github.io/리포지토리이름/` 에서 접속합니다.
