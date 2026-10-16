@@ -1,11 +1,12 @@
 (() => {
   const $ = id => document.getElementById(id);
   const monsters = [
-    {name:"훈련병 재윤", type:"조사병단 · 신병형", art:"⚔", color:"#7fa37a", unlock:0, desc:"아직 서툴지만 누구보다 용감한 신병"},
-    {name:"기동병 미라", type:"조사병단 · 기동형", art:"✦", color:"#a7c4a2", unlock:150, desc:"입체기동장치로 거인의 약점을 노려"},
-    {name:"분대장 레온", type:"조사병단 · 최강형", art:"⌖", color:"#b8c2ca", unlock:350, desc:"냉철한 판단으로 거인을 베는 최강의 병사"},
-    {name:"단장 아르윈", type:"조사병단 · 지휘형", art:"✧", color:"#d6b18e", unlock:650, desc:"인류의 희망을 이끄는 노련한 지휘관"}
+    {name:"훈련병 재윤", type:"조사병단 · 신병형", art:"⚔", img:"img/hero1.png", color:"#7fa37a", unlock:0, desc:"아직 서툴지만 누구보다 용감한 신병"},
+    {name:"기동병 미라", type:"조사병단 · 기동형", art:"✦", img:"img/hero2.png", color:"#a7c4a2", unlock:150, desc:"입체기동장치로 거인의 약점을 노려"},
+    {name:"분대장 레온", type:"조사병단 · 최강형", art:"⌖", img:"img/hero3.png", color:"#b8c2ca", unlock:350, desc:"냉철한 판단으로 거인을 베는 최강의 병사"},
+    {name:"단장 아르윈", type:"조사병단 · 지휘형", art:"✧", img:"img/hero4.png", color:"#d6b18e", unlock:650, desc:"인류의 희망을 이끄는 노련한 지휘관"}
   ];
+  const enemyImgs = ["img/titan1.png","img/titan2.png"];
   const tips = [
     "분수는 분모를 같게 만든 뒤 분자끼리 계산하면 쉬워져!",
     "백분율은 전체를 100으로 생각하면 계산하기 편해.",
@@ -39,6 +40,12 @@
   function normalize(s){return String(s).trim().replace(/\s/g,"").replace(/,/g,"").replace(/％/g,"%").replace(/%$/,"");}
   function answerCorrect(input,answer){let a=normalize(input),b=normalize(answer);if(a===b)return true;const numericA=Number(a),numericB=Number(b);return a!==""&&Number.isFinite(numericA)&&Number.isFinite(numericB)&&Math.abs(numericA-numericB)<0.011;}
   function currentMonster(){return Math.min(state.evolutionIndex||0, monsters.length-1);}
+  function paint(el,m){if(!el)return;el.textContent="";el.style.backgroundImage=`url(${m.img})`;el.style.backgroundSize="cover";el.style.backgroundPosition="center top";el.style.backgroundRepeat="no-repeat";el.style.borderRadius="12px";}
+  function paintEnemy(){
+    let img=$("enemyArt");
+    if(!img){const name=$("enemyName");if(!name)return;img=document.createElement("img");img.id="enemyArt";img.alt="거인";img.style.cssText="display:block;margin:0 auto 8px;width:min(220px,60%);aspect-ratio:1/1;object-fit:cover;object-position:center top;border-radius:14px;border:2px solid #b08d57;box-shadow:0 4px 16px rgba(0,0,0,.5);";name.parentNode.insertBefore(img,name);}
+    img.src=enemyImgs[(state.round-1)%enemyImgs.length];
+  }
   function render(){
     state.level=levelFor(state.xp);
     $("level").textContent=`Lv. ${state.level}`;
@@ -55,26 +62,25 @@
     $("timer").textContent=fmtTime(state.seconds);
     const idx=currentMonster(), m=monsters[idx];
     $("evolutionTag").textContent=`${m.name.toUpperCase()} · EVOLUTION ${idx+1}`;
-    $("heroMonster").querySelector(".monster-face").textContent=m.art;
-    $("heroMonster").querySelector(".monster-face").style.background=`linear-gradient(140deg,${m.color},#49a8c6)`;
-    $("friendBody").textContent=m.art;
+    paint($("heroMonster").querySelector(".monster-face"),m);
+    paint($("friendBody"),m);
     $("friendName").textContent=m.name;
     $("collectionName").textContent=m.name;
     $("collectionType").textContent=m.type;
-    $("collectionMonster").querySelector(".big-monster").textContent=m.art;
-    $("collectionMonster").querySelector(".big-monster").style.color=m.color;
+    paint($("collectionMonster").querySelector(".big-monster"),m);
     const next=monsters[Math.min(idx+1,monsters.length-1)];
     const progress=idx===monsters.length-1?100:Math.min(100,Math.max(0,(state.xp-m.unlock)/(next.unlock-m.unlock)*100));
     $("evolutionBar").style.width=`${progress}%`;
     $("evolutionText").textContent=idx===monsters.length-1?"모든 병사를 해금했어!":`다음 진화까지 ${Math.max(0,next.unlock-state.xp)} XP`;
     $("monsterCount").textContent=`${state.unlocked.filter(Boolean).length}/4`;
-    $("monsterList").innerHTML=monsters.map((mon,i)=>`<div class="monster-chip ${state.unlocked[i]||state.xp>=mon.unlock?"unlocked":""}"><span class="chip-art" style="color:${mon.color}">${state.xp>=mon.unlock?mon.art:"?"}</span><small>${state.xp>=mon.unlock?mon.name:"미발견"}</small></div>`).join("");
+    $("monsterList").innerHTML=monsters.map((mon,i)=>`<div class="monster-chip ${state.unlocked[i]||state.xp>=mon.unlock?"unlocked":""}"><span class="chip-art" style="color:${mon.color}">${state.xp>=mon.unlock?`<img src="${mon.img}" alt="${mon.name}" style="width:48px;height:48px;object-fit:cover;object-position:center top;border-radius:10px;display:block">`:"?"}</span><small>${state.xp>=mon.unlock?mon.name:"미발견"}</small></div>`).join("");
     $("missionProgress").textContent=`${Math.min(5,state.questions)} / 5 완료`;
     $("missionBar").style.width=`${Math.min(100,state.questions/5*100)}%`;
     $("comboProgress").textContent=`최고 ${state.bestStreak}콤보`;
     $("comboBar").style.width=`${Math.min(100,state.bestStreak/3*100)}%`;
     $("evolveBtn").disabled=idx===monsters.length-1||state.xp<next.unlock;
     if(state.question){$("topic").textContent=state.question.topic;$("questionText").textContent=state.question.q;}
+    paintEnemy();
     save();
   }
   function newQuestion(){state.question=makeQuestion();state.hinted=false;$("topic").textContent=state.question.topic;$("questionText").textContent=state.question.q;$("questionCount").textContent=`문제 ${state.questions+1}`;$("feedback").textContent="정답을 입력하고 공격해 봐!";$("feedback").className="question-hint";$("answerInput").value="";$("answerInput").focus();render();}
