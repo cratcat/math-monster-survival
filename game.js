@@ -2,9 +2,9 @@
   const $ = id => document.getElementById(id);
   const monsters = [
     {name:"모찌", type:"전기 타입 · 성장형", art:"◕ᴥ◕", color:"#8ef1db", unlock:0, desc:"작지만 용감한 전기 슬라임"},
-    {name:"플레어", type:"불꽃 타입 · 돌격형", art:"ʕ🔥ᴥ🔥ʔ", color:"#ffad7a", unlock:150, desc:"뜨거운 불꽃으로 길을 열어"},
-    {name:"프로스트", type:"얼음 타입 · 수호형", art:"❄ᴥ❄", color:"#9bcfff", unlock:350, desc:"차가운 얼음 방패를 가진 친구"},
-    {name:"루미", type:"빛 타입 · 전설형", art:"✧ᴥ✧", color:"#e5c5ff", unlock:650, desc:"빛의 힘으로 마지막 던전을 밝혀"}
+    {name:"기동병 세라", type:"정예 병단 · 기동형", art:"✦", color:"#a7c4a2", unlock:150, desc:"빠른 기동으로 빈틈을 노려"},
+    {name:"전략가 카일", type:"정예 병단 · 전략형", art:"⌖", color:"#b8c2ca", unlock:350, desc:"분석과 판단으로 작전을 지휘해"},
+    {name:"단장 노아", type:"정예 병단 · 지휘형", art:"✧", color:"#d6b18e", unlock:650, desc:"병단을 이끄는 노련한 지휘관"}
   ];
   const tips = [
     "분수는 분모를 같게 만든 뒤 분자끼리 계산하면 쉬워져!",
@@ -82,7 +82,7 @@
     if(state.sessionActive)return;
     state.sessionActive=true;state.playerHp=100;state.enemyHp=100;state.round=1;
     $("startBtn").textContent="⏸ 도전 중";$("startBtn").disabled=true;$("answerInput").disabled=false;$("answerBtn").disabled=false;$("hintBtn").disabled=false;$("skipBtn").disabled=false;
-    $("arenaMessage").textContent="몬스터가 나타났어! 정답을 맞혀 공격하자.";
+    $("arenaMessage").textContent="거인이 나타났다! 정답을 맞혀 토벌하자.";
     timerInterval=setInterval(()=>{if(state.sessionActive){state.seconds++;$("timer").textContent=fmtTime(state.seconds);}},1000);
     newQuestion();
   }
@@ -103,11 +103,11 @@
     if(answerCorrect(input,state.question.answer)){
       state.correct++;state.streak++;state.bestStreak=Math.max(state.bestStreak,state.streak);
       const gain=state.hinted?8:15;state.xp+=gain;state.totalXp+=gain;state.shards+=1;
-      state.enemyHp-=34;$("feedback").textContent=`정답! +${gain} XP · 몬스터에게 강력한 공격을 했어!`;$("feedback").className="question-hint good";
+      state.enemyHp-=34;$("feedback").textContent=`정답! +${gain} XP · 거인에게 강력한 공격을 했어!`;$("feedback").className="question-hint good";
       $("arenaMessage").textContent=`정답 공격 성공! ${gain} XP 획득`;
       $("friendBody").classList.remove("attack");void $("friendBody").offsetWidth;$("friendBody").classList.add("attack");
       $("enemyHealth").style.width=`${Math.max(0,state.enemyHp)}%`;
-      if(state.enemyHp<=0){state.round++;state.enemyHp=100;$("enemyHealth").style.width="100%";$("enemyName").textContent=["그림자 버그","크리스탈 슬라임","어둠의 골렘","미궁의 수호자"][(state.round-1)%4];toast("몬스터 격파! 새 라운드 진입!");}
+      if(state.enemyHp<=0){state.round++;state.enemyHp=100;$("enemyHealth").style.width="100%";$("enemyName").textContent=["기행종 거인","갑주형 거인","대형 거인","야수형 거인"][(state.round-1)%4];toast("거인 토벌 성공! 다음 작전으로!");}
       if(state.streak>=3&&!state.comboClaimed){state.shards++;state.comboClaimed=true;toast("3콤보 보상! 몬스터 조각 +1");}
       if(state.questions>=5&&!state.missionClaimed){state.xp+=20;state.totalXp+=20;state.missionClaimed=true;toast("미션 완료! 보너스 +20 XP");}
       const oldUnlock=state.unlocked.slice();state.unlocked=monsters.map(m=>state.xp>=m.unlock);
@@ -117,7 +117,7 @@
     }else{
       state.streak=0;state.playerHp-=20;$("playerHealth").style.width=`${Math.max(0,state.playerHp)}%`;
       $("feedback").textContent=`아쉽지만 오답이야. 힌트: ${state.question.hint}`;$("feedback").className="question-hint bad";
-      $("arenaMessage").textContent="몬스터의 반격! 힌트를 확인하고 다시 도전해.";
+      $("arenaMessage").textContent="거인의 반격! 힌트를 확인하고 다시 도전해.";
       $("enemyHealth").style.width=`${Math.max(0,state.enemyHp)}%`;
       $("questionText").textContent=state.question.q;
       if(state.playerHp<=0){render();endSession(false);return;}
